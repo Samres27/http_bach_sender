@@ -1,4 +1,4 @@
-{% load tailwind_tags %}
+{% load static tailwind_tags %}
 
 <!DOCTYPE html>
 <html lang="es" data-theme="light">
@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <title>Gestión de Cola</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.0/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/output.css' %}" rel="stylesheet" type="text/css" />
 </head>
 <body class="bg-[#0F172A] text-[#E2E8F0] min-h-screen p-8">
 
