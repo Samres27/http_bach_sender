@@ -1,0 +1,94 @@
+{% load tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Cola</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.0/dist/full.min.css" rel="stylesheet" type="text/css" />
+</head>
+<body class="bg-[#0F172A] text-[#E2E8F0] min-h-screen p-8">
+
+    <!-- Panel Superior -->
+    <div class="bg-[#0F172A] p-6 rounded-t-xl border-b border-[#334155] flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-[#E2E8F0] tracking-wider">COLA DE PETICIONES</h1>
+        <div class="flex gap-4">
+            <button class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
+                EJECUTAR
+            </button>
+            <button class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
+                BORRAR
+            </button>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <div class="bg-[#0F172A] p-6 border-x border-b border-[#334155] rounded-b-xl">
+
+        <!-- Tabla de Datos -->
+        <div class="overflow-x-auto rounded-lg border border-[#334155]">
+            <table class="table w-full">
+                <thead>
+                    <tr class="bg-[#1E293B] text-[#94A3B8] border-b border-[#334155]">
+                        <th class="text-[#94A3B8] font-medium">ID Petición</th>
+                        <th class="text-[#94A3B8] font-medium">Hora</th>
+                        <th class="text-[#94A3B8] font-medium">Método</th>
+                        <th class="text-[#94A3B8] font-medium">URL</th>
+                        <th class="text-[#94A3B8] font-medium">Estado</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    <!-- Fila normal -->
+                    <tr onclick="seleccionarFila(this)" class="hover:bg-[#1E293B] border-b border-[#334155]">
+                        <td class="text-[#E2E8F0]">001</td>
+                        <td class="text-[#E2E8F0]">14:20</td>
+                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">GET</span></td>
+                        <td class="text-[#E2E8F0]">/api/data</td>
+                        <td><span class="text-[#94A3B8] font-semibold">Pendiente</span></td>
+                    </tr>
+                    <!-- Fila resaltada (Seleccionada) -->
+                    <tr onclick="seleccionarFila(this)" class="bg-[#1E293B] border-l-4 border-[#38BDF8] border-b border-[#334155]">
+                        <td class="text-[#E2E8F0]">002</td>
+                        <td class="text-[#E2E8F0]">14:22</td>
+                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">POST</span></td>
+                        <td class="text-[#E2E8F0]">/login</td>
+                        <td><span class="text-[#38BDF8] font-semibold">Fallida 503</span></td>
+                    </tr>
+                    <!-- Fila normal -->
+                    <tr onclick="seleccionarFila(this)" class="hover:bg-[#1E293B] border-b border-[#334155]">
+                        <td class="text-[#E2E8F0]">003</td>
+                        <td class="text-[#E2E8F0]">14:25</td>
+                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">PUT</span></td>
+                        <td class="text-[#E2E8F0]">/profile/update</td>
+                        <td><span class="text-[#38BDF8] font-semibold">Modificada</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botón Editar -->
+        <div class="flex justify-end mt-6">
+            <button type="button" onclick="send()" class="btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
+                EDITAR PETICIÓN
+            </button>
+        </div>
+
+    </div>
+    <script>
+        function seleccionarFila(fila) {
+        // Busca todas las filas de la tabla
+        var filas = fila.parentElement.getElementsByTagName("tr");
+
+        // Quita el color amarillo de las otras filas
+        for (var i = 0; i < filas.length; i++) {
+            filas[i].classList.remove("seleccionada");
+        }
+
+        console.log(fila)
+        fila.classList.add("seleccionada");
+        }
+    </script>
+
+</body>
+</html>
