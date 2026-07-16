@@ -21,9 +21,9 @@
                 EJECUTAR
             </button>
             <a href="{% url 'editar' %}"><button
-                class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
-                AÑADIR
-            </button> </a>
+                    class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
+                    AÑADIR
+                </button> </a>
         </div>
     </div>
 
@@ -43,43 +43,31 @@
                 </thead>
                 <tbody class="text-center overflow-auto">
                     <!-- Fila normal -->
-                    <tr onclick="seleccionarFila(this)"  id="1" class="hover:bg-[#1E293B] border-b border-[#334155]">
-                        <td class="text-[#E2E8F0]">001</td>
-                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">GET</span></td>
-                        <td class="text-[#E2E8F0]">example:443</td>
-                        <td class="text-[#E2E8F0]">/api/data</td>
+                    {% for x in peticiones %}
+                    <tr onclick="seleccionarFila(this)" id="{{x.nroPeticion}}"
+                        class="hover:bg-[#1E293B] border-b border-[#334155]">
+                        <td class="text-[#E2E8F0]">{{x.nroPeticion}}</td>
+                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">{{x.metodo}}</span></td>
+                        <td class="text-[#E2E8F0]">{{x.dominio}}</td>
+                        <td class="text-[#E2E8F0]">{{x.url}}</td>
                     </tr>
-                    <!-- Fila resaltada (Seleccionada) -->
-                    <tr onclick="seleccionarFila(this)" id="2" class="bg-[#1E293B] border-l-4  border-b border-[#334155]">
-                        <td class="text-[#E2E8F0]">002</td>
-                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">POST</span></td>
-                        <td class="text-[#E2E8F0]">example:443</td>
-                        <td class="text-[#E2E8F0]">/login</td>
-                    </tr>
-                    <!-- Fila normal -->
-                    <tr onclick="seleccionarFila(this)" id="3" class="hover:bg-[#1E293B] border-b border-[#334155]">
-                        <td class="text-[#E2E8F0]">003</td>
-                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">PUT</span></td>
-                        <td class="text-[#E2E8F0]">example:443</td>
-                        <td class="text-[#E2E8F0]">/profile/update</td>
-                    </tr>
-                   
-                    
+                    {% endfor%}
+
                 </tbody>
             </table>
         </div>
 
         <!-- Botón Editar -->
         <div class="flex mt-6 gap-2">
-            <button type="button" onclick="send()"
+            <button type="button" onclick="editarPeticion()"
                 class="btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
                 EDITAR PETICIÓN
             </button>
-            <button type="button" onclick="send()"
+            <button type="button" onclick="borrarPeticion()"
                 class="btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
                 BORRAR PETICIÓN
             </button>
-            <button type="button" onclick="send()"
+            <button type="button" onclick="borrarPeticionTodo()"
                 class=" ml-auto btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
                 BORRAR TODO
             </button>
@@ -87,6 +75,7 @@
 
     </div>
     <script>
+        let nroPeticion = 0
         function seleccionarFila(fila) {
             // Busca todas las filas de la tabla
             var filas = fila.parentElement.getElementsByTagName("tr");
@@ -100,9 +89,24 @@
                 }
             }
 
-            console.log(fila.id)
+            nroPeticion = Number(fila.id)
             fila.classList.add("border-l-4");
             fila.classList.add("bg-[#1E293B]");
+        }
+        function editarPeticion() {
+            if (nroPeticion) {
+                window.location.href = "{% url 'editar' %}/" + nroPeticion
+            }
+        }
+        function borrarPeticion() {
+            if (nroPeticion) {
+                const url = "{% url 'borrar_peticion_uno' 0 %}"
+                let urlFinal = url.replace('0', nroPeticion);
+                window.location.href = urlFinal
+            }
+        }
+        function borrarPeticionTodo() {
+            window.location.href = "{% url 'borrar_peticion_todo' %}"
         }
     </script>
 

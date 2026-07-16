@@ -55,7 +55,8 @@
                     </select> -->
                     <div class="text-center text-xl">Dominio: </div>
                     <input class="input col-span-6 ... rounded-lg border border-[#334155]" type="text"
-                        placeholder="https://example.com" id="dominio"></input>
+                        placeholder="https://example.com" id="dominio" value="{{peticion.dominio}}">
+                    </input>
                 </div>
                 <div class="w-full flex flex-col flex-1 p-4">
                     <div class="grid controls flex-col grid-cols-3 grap-1 ">
@@ -91,243 +92,251 @@
                     </div>
                 </div>
 
-                <div id="toast" class="toast"></div>
 
                 <script>
-                    (function () {
-                        'use strict';
-
-                        // ----- DOM -----
-                        const textarea = document.getElementById('inputText');
-                        const insertSelect = document.getElementById('insertSelect');
-                        const customCharInput = document.getElementById('customCharInput');
-                        const insertBtn = document.getElementById('insertBtn');
-                        const copyRawBtn = document.getElementById('copyRawBtn');
-                        const copyEscapedBtn = document.getElementById('copyEscapedBtn');
-                        const clearBtn = document.getElementById('clearBtn');
-                        const toastEl = document.getElementById('toast');
-
-                        // ----- Estado -----
-                        let rawText = '';      // texto real con caracteres especiales
-                        let escapedText = '';  // versión escapada (se muestra en textarea)
-
-                        // ----- Utilidades -----
-                        function escapeHtml(str) {
-                            const div = document.createElement('div');
-                            div.textContent = str;
-                            return div.innerHTML;
-                        }
-
-                        function showToast(msg, duration = 2000) {
-                            toastEl.textContent = msg;
-                            toastEl.classList.add('show');
-                            clearTimeout(window._toastTimer);
-                            window._toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
-                        }
-
-                        function escapeChar(char) {
-                            const code = char.charCodeAt(0);
-                            if (code === 13) return '\\r';
-                            if (code === 10) return '\n';
-                            if (code === 9) return '\\t';
-                            if (code === 0) return '\\0';
-                            if (code === 27) return '\\x1B';
-                            if (code < 32 || code === 127 || code > 127) {
-                                const hex = code.toString(16).toUpperCase().padStart(2, '0');
-                                return '\\x' + hex;
-                            }
-                            return char;
-                        }
-
-                        function escapeString(str) {
-                            let result = '';
-                            for (let i = 0; i < str.length; i++) {
-                                result += escapeChar(str[i]);
-                            }
-                            return result;
-                        }
-
-                        // Desescapar (interpretar secuencias) a caracteres reales
-                        function unescapeString(str) {
-                            return str.replace(/\\(r|t|0|x([0-9A-Fa-f]{2}))/g, function (match, p1, p2) {
-                                if (p1 === 'r') return '\r';
-                                if (p1 === 't') return '\t';
-                                if (p1 === '0') return '\0';
-                                if (p1 === 'x' && p2) {
-                                    return String.fromCharCode(parseInt(p2, 16));
-                                }
-                                return match;
-                            });
-                        }
-
-                        // ----- Renderizar raw resaltado -----
-
-                        // ----- Sincronizar todo a partir del textarea (escapedText) -----
-                        function syncFromTextarea() {
-                            const input = textarea.value;
-                            escapedText = input;
-                            // Interpretar escapes para obtener raw
-                            rawText = unescapeString(input);
-
-                        }
-                        // ----- Mostrar/ocultar personalizado -----
-                        insertSelect.addEventListener('change', function () {
-                            if (this.value === 'custom') {
-                                customCharInput.style.display = 'inline-block';
-                                customCharInput.focus();
-                            } else {
-                                customCharInput.style.display = 'none';
-                            }
-                        });
-                        // ----- Interceptar pegado (convertir automáticamente a escapes) -----
-                        function handlePaste(e) {
-                            e.preventDefault();
-                            const clipboardData = e.clipboardData || window.clipboardData;
-                            const encoder = new TextEncoder();
-                            let pasted = clipboardData.getData("text/plain");
-                            pasted = pasted.replace(/\r\n|\n/g, '\r\n');
-                            console.log("Texto real:", JSON.stringify(pasted));
-                            if (pasted) {
-                                // Escapar el texto pegado
-                                const escaped = escapeString(pasted);
-                                // Insertar en el cursor
-                                const start = textarea.selectionStart;
-                                const end = textarea.selectionEnd;
-                                const current = textarea.value;
-                                const newEscaped = current.substring(0, start) + escaped + current.substring(end);
-                                textarea.value = newEscaped;
-                                // Después de pegar, sincronizar
-                                syncFromTextarea();
-                                // Colocar cursor después del texto pegado
-                                const newCursor = start + escaped.length;
-                                textarea.selectionStart = textarea.selectionEnd = newCursor;
-                            }
-                        }
-
-                        // ----- Eventos -----
-                        textarea.addEventListener('input', syncFromTextarea);
-                        textarea.addEventListener('paste', handlePaste);
-
-                        // ----- Insertar carácter -----
-                        insertBtn.addEventListener('click', function () {
-                            let selected = insertSelect.value;
-                            let charToInsert = '';
-
-                            if (selected === 'custom') {
-                                const custom = customCharInput.value.trim();
-                                if (!custom) {
-                                    showToast('Escribe un valor (ej. 0D para \\r).', 1500);
-                                    return;
-                                }
-                                // Interpretar como hex (con o sin 0x) o como carácter literal
-                                let hexMatch = custom.match(/^(0x)?([0-9A-Fa-f]{2})$/i);
-                                if (hexMatch) {
-                                    const code = parseInt(hexMatch[2], 16);
-                                    if (code >= 0 && code <= 255) {
-                                        charToInsert = String.fromCharCode(code);
-                                    } else {
-                                        showToast('Código fuera de rango (0-255).', 1500);
-                                        return;
-                                    }
-                                } else if (custom.length === 1) {
-                                    charToInsert = custom;
-                                } else {
-                                    // Intentar interpretar como secuencia de escape literal (ej. \r)
-                                    const unescaped = unescapeString(custom);
-                                    if (unescaped !== custom) {
-                                        charToInsert = unescaped;
-                                    } else {
-                                        showToast('Formato inválido. Usa hex (0D) o carácter literal.', 1500);
-                                        return;
-                                    }
-                                }
-                            } else {
-                                // Opciones predefinidas (son strings como "\r", "\n", etc.)
-                                charToInsert = unescapeString(selected);
-                            }
-
-                            if (charToInsert) {
-                                // Insertar en rawText (al final, porque no tenemos posición exacta)
-                                rawText += charToInsert;
-                                // Actualizar escaped
-                                escapedText = escapeString(rawText);
-                                textarea.value = escapedText;
-                                syncFromTextarea();
-                                customCharInput.value = '';
-                                showToast(`Insertado: ${JSON.stringify(charToInsert)}`, 1500);
-                            }
-                        });
-
-                        // ----- Copiar raw -----
-                        copyRawBtn.addEventListener('click', function () {
-                            if (!rawText) {
-                                showToast('No hay texto raw para copiar.', 1500);
-                                return;
-                            }
-                            navigator.clipboard.writeText(rawText).then(() => {
-                                showToast('¡Texto RAW copiado al portapapeles!', 2000);
-                            }).catch(() => {
-                                const area = document.createElement('textarea');
-                                area.value = rawText;
-                                document.body.appendChild(area);
-                                area.select();
-                                document.execCommand('copy');
-                                document.body.removeChild(area);
-                                showToast('¡Texto RAW copiado!', 2000);
-                            });
-                        });
-
-
-
-                        // ----- Limpiar -----
-                        clearBtn.addEventListener('click', function () {
-                            rawText = '';
-                            escapedText = '';
-                            textarea.value = '';
-                            syncFromTextarea();
-                            showToast('Todo limpiado.', 1000);
-                        });
-
-                        // ----- Inicializar -----
-                        function init() {
-                            // El textarea ya tiene un ejemplo
-                            syncFromTextarea();
-                        }
-
-                        init();
-
-                        // Enter en personalizado dispara inserción
-                        customCharInput.addEventListener('keydown', function (e) {
-                            if (e.key === 'Enter') {
-                                insertBtn.click();
-                                e.preventDefault();
-                            }
-                        });
-
-                    })();
+                    let rawText = "{{ peticion.peticion|escapejs }}";
+                    console.log("rawText_reciendo cargado :" + rawText)  
                 </script>
+
             </div>
         </div>
 
         <!-- Botones: los dejamos al final sin flex-1 para que no se estiren -->
         <div class="flex justify-end m-6">
-            <div class="mr-auto" id="mensajes_error">
-                mensaje de prueba
+            <div class="mr-auto" id="toast">
+
             </div>
-            <a href="{% url 'solicitudes' %}"><button
-                    class="mr-6 btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
-                    BORRAR
-                </button></a>
+            
             <button onclick="guardarPeticion()"
                 class="btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
 
                 GUARDAR
             </button>
         </div>
+        <script>
+                (function () {
+                    'use strict';
+
+                    // ----- DOM -----
+                    const textarea = document.getElementById('inputText');
+                    const insertSelect = document.getElementById('insertSelect');
+                    const customCharInput = document.getElementById('customCharInput');
+                    const insertBtn = document.getElementById('insertBtn');
+                    const copyRawBtn = document.getElementById('copyRawBtn');
+                    const copyEscapedBtn = document.getElementById('copyEscapedBtn');
+                    const clearBtn = document.getElementById('clearBtn');
+                    const toastEl = document.getElementById('toast');
+
+                    // ----- Estado -----      // texto real con caracteres especiales
+                    let escapedText = '';  // versión escapada (se muestra en textarea)
+
+                    // ----- Utilidades -----
+                    function escapeHtml(str) {
+                        const div = document.createElement('div');
+                        div.textContent = str;
+                        return div.innerHTML;
+                    }
+
+                    function showToast(msg, duration = 2000) {
+                        toastEl.textContent = msg;
+                        toastEl.classList.add('show');
+                        clearTimeout(window._toastTimer);
+                        window._toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
+                    }
+
+                    function escapeChar(char) {
+                        const code = char.charCodeAt(0);
+                        if (code === 13) return '\\r';
+                        if (code === 10) return '\n';
+                        if (code === 9) return '\\t';
+                        if (code === 0) return '\\0';
+                        if (code === 27) return '\\x1B';
+                        if (code < 32 || code === 127 || code > 127) {
+                            const hex = code.toString(16).toUpperCase().padStart(2, '0');
+                            return '\\x' + hex;
+                        }
+                        return char;
+                    }
+
+                    function escapeString(str) {
+                        let result = '';
+                        for (let i = 0; i < str.length; i++) {
+                            result += escapeChar(str[i]);
+                        }
+                        return result;
+                    }
+
+                    // Desescapar (interpretar secuencias) a caracteres reales
+                    function unescapeString(str) {
+                        return str.replace(/\\(r|t|0|x([0-9A-Fa-f]{2}))/g, function (match, p1, p2) {
+                            if (p1 === 'r') return '\r';
+                            if (p1 === 't') return '\t';
+                            if (p1 === '0') return '\0';
+                            if (p1 === 'x' && p2) {
+                                return String.fromCharCode(parseInt(p2, 16));
+                            }
+                            return match;
+                        });
+                    }
+
+                    // ----- Renderizar raw resaltado -----
+
+                    // ----- Sincronizar todo a partir del textarea (escapedText) -----
+                    function syncFromTextarea() {
+                        const input = textarea.value;
+                        escapedText = input;
+                        // Interpretar escapes para obtener raw
+                        rawText = unescapeString(input);
+
+                    }
+                    // ----- Mostrar/ocultar personalizado -----
+                    insertSelect.addEventListener('change', function () {
+                        if (this.value === 'custom') {
+                            customCharInput.style.display = 'inline-block';
+                            customCharInput.focus();
+                        } else {
+                            customCharInput.style.display = 'none';
+                        }
+                    });
+                    // ----- Interceptar pegado (convertir automáticamente a escapes) -----
+                    function handlePaste(e) {
+                        e.preventDefault();
+                        const clipboardData = e.clipboardData || window.clipboardData;
+                        const encoder = new TextEncoder();
+                        let pasted = clipboardData.getData("text/plain");
+                        pasted = pasted.replace(/\r\n|\n/g, '\r\n');
+                        if (pasted) {
+                            // Escapar el texto pegado
+                            const escaped = escapeString(pasted);
+                            // Insertar en el cursor
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const current = textarea.value;
+                            const newEscaped = current.substring(0, start) + escaped + current.substring(end);
+                            textarea.value = newEscaped;
+                            // Después de pegar, sincronizar
+                            syncFromTextarea();
+                            // Colocar cursor después del texto pegado
+                            const newCursor = start + escaped.length;
+                            textarea.selectionStart = textarea.selectionEnd = newCursor;
+                        }
+                    }
+
+                    // ----- Eventos -----
+                    textarea.addEventListener('input', syncFromTextarea);
+                    textarea.addEventListener('paste', handlePaste);
+
+                    // ----- cargar backend ---
+                    document.addEventListener('DOMContentLoaded', function () {
+                        console.log("cargado")
+                        const escaped = escapeString(rawText);
+                        textarea.value = escaped;
+                    })
+
+                    // ----- Insertar carácter -----
+                    insertBtn.addEventListener('click', function () {
+                        let selected = insertSelect.value;
+                        let charToInsert = '';
+
+                        if (selected === 'custom') {
+                            const custom = customCharInput.value.trim();
+                            if (!custom) {
+                                showToast('Escribe un valor (ej. 0D para \\r).', 1500);
+                                return;
+                            }
+                            // Interpretar como hex (con o sin 0x) o como carácter literal
+                            let hexMatch = custom.match(/^(0x)?([0-9A-Fa-f]{2})$/i);
+                            if (hexMatch) {
+                                const code = parseInt(hexMatch[2], 16);
+                                if (code >= 0 && code <= 255) {
+                                    charToInsert = String.fromCharCode(code);
+                                } else {
+                                    showToast('Código fuera de rango (0-255).', 1500);
+                                    return;
+                                }
+                            } else if (custom.length === 1) {
+                                charToInsert = custom;
+                            } else {
+                                // Intentar interpretar como secuencia de escape literal (ej. \r)
+                                const unescaped = unescapeString(custom);
+                                if (unescaped !== custom) {
+                                    charToInsert = unescaped;
+                                } else {
+                                    showToast('Formato inválido. Usa hex (0D) o carácter literal.', 1500);
+                                    return;
+                                }
+                            }
+                        } else {
+                            // Opciones predefinidas (son strings como "\r", "\n", etc.)
+                            charToInsert = unescapeString(selected);
+                        }
+
+                        if (charToInsert) {
+                            // Insertar en rawText (al final, porque no tenemos posición exacta)
+                            rawText += charToInsert;
+                            // Actualizar escaped
+                            escapedText = escapeString(rawText);
+                            textarea.value = escapedText;
+                            syncFromTextarea();
+                            customCharInput.value = '';
+                            showToast(`Insertado: ${JSON.stringify(charToInsert)}`, 1500);
+                        }
+                    });
+
+                    // ----- Copiar raw -----
+                    copyRawBtn.addEventListener('click', function () {
+                        if (!rawText) {
+                            showToast('No hay texto raw para copiar.', 1500);
+                            return;
+                        }
+                        navigator.clipboard.writeText(rawText).then(() => {
+                            showToast('¡Texto RAW copiado al portapapeles!', 2000);
+                        }).catch(() => {
+                            const area = document.createElement('textarea');
+                            area.value = rawText;
+                            document.body.appendChild(area);
+                            area.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(area);
+                            showToast('¡Texto RAW copiado!', 2000);
+                        });
+                    });
+
+
+
+                    // ----- Limpiar -----
+                    clearBtn.addEventListener('click', function () {
+                        rawText = '';
+                        escapedText = '';
+                        textarea.value = '';
+                        syncFromTextarea();
+                        showToast('Todo limpiado.', 1000);
+                    });
+
+                    // ----- Inicializar -----
+                    // function init() {
+                    //     // El textarea ya tiene un ejemplo
+                    //     syncFromTextarea();
+                    // }
+
+                    // init();
+
+                    // Enter en personalizado dispara inserción
+                    customCharInput.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') {
+                            insertBtn.click();
+                            e.preventDefault();
+                        }
+                    });
+
+                })();
+
+        </script>
     </div>
     </div>
 
     <script>
+        const nro = "{{peticion.nroPeticion}}"||0
         function validarURLConHost(texto) {
             try {
                 const url = new URL(texto);
@@ -338,23 +347,47 @@
             }
         }
         function guardarPeticion() {
+            console.log("guaradar peticion")
             const pdominio = document.getElementById('dominio');
-            if (validarURLConHost(pdominio)) {
-                document.getElementById("mensajes_error").innerText = "Dominio no valido revise, revise el campo dominio"
+
+            if (!validarURLConHost(pdominio.value)) {
+                document.getElementById("toast").innerText = "Dominio no valido revise, revise el campo dominio"
             } else {
+                
                 const ppeticion = document.getElementById('inputText');
                 const regex = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\s+(\S+)/;
-                const match = peticion.match(regex);
-                fetch('https://example.com', {
+                const match = ppeticion.value.match(regex);
+
+                if (!match) {
+                    document.getElementById("toast").innerText = "Formato inválido. Debe iniciar con un Método HTTP válido (Ej: GET /ruta).";
+                    return; // Detenemos la ejecución aquí
+                }
+
+                fetch("{% url 'guardar_peticion' %}", {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dominio:pdominio , metodo: match[1], url:match[2], peticion: ppeticion})
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "nroPeticion" : nro,
+                        "dominio": pdominio.value,
+                        "metodo": match[1],
+                        "url": match[2],
+                        "peticion": ppeticion.value
+                    })
                 })
-                    .then(respuesta => respuesta.json())
-                    .then(datos => 
-                        window.location.href = "{% url 'solicitudes' %}"
-                    );
-                
+                    .then(response => {
+                        if (!response.ok) {
+                            // Esto envía el error al bloque .catch de abajo
+                            throw new Error(response.status);
+                        }
+                        window.location.href = "{% url 'solicitudes' %}";
+                    })
+                    .catch(error => {
+                        // Aquí llega cualquier error (de red o el que lanzamos arriba)
+                        document.getElementById("toast").innerText = "La petición es inválida. Código: " + error.message;
+                    });
+
             }
 
         }
