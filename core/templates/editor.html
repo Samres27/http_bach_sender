@@ -23,10 +23,10 @@
         <div class="p-6 border-b border-[#334155] flex justify-between items-center">
             <h1 class="text-2xl font-bold text-[#E2E8F0] tracking-wider">EDITOR</h1>
             <div class="flex gap-4">
-                <button
-                    class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
-                    VOLVER
-                </button>
+                <a href="{% url 'solicitudes' %}"><button
+                        class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
+                        VOLVER
+                    </button></a>
             </div>
         </div>
 
@@ -44,7 +44,7 @@
             -->
             <div class="flex flex-col flex-1 overflow-auto rounded-lg border border-[#334155]">
                 <div class="w-full grid grid-cols-7 gap-4 p-4">
-                    <select id="metodo" name="metodo" class="select rounded-md border border-[#334155] text-center">
+                    <!-- <select id="metodo" name="metodo" class="select rounded-md border border-[#334155] text-center">
                         <option value="GET">GET</option>
                         <option value="POST">POST</option>
                         <option value="PUT">PUT</option>
@@ -52,8 +52,10 @@
                         <option value="HEAD">HEAD</option>
                         <option value="OPTIONS">OPTIONS</option>
                         <option value="TRACE">TRACE</option>
-                    </select>
-                    <input class="input col-span-6 ... rounded-lg border border-[#334155]" type="text" placeholder="https://example.com"></input>
+                    </select> -->
+                    <div class="text-center text-xl">Dominio: </div>
+                    <input class="input col-span-6 ... rounded-lg border border-[#334155]" type="text"
+                        placeholder="https://example.com" id="dominio"></input>
                 </div>
                 <div class="w-full flex flex-col flex-1 p-4">
                     <div class="grid controls flex-col grid-cols-3 grap-1 ">
@@ -66,21 +68,28 @@
                                 <option value="\x7F"> &nbsp; \x7F (DEL)</option>
                                 <option value="custom">✏️ Personalizado</option>
                             </select>
-                            <input type="text" id="customCharInput" class="input w-[5ch] rounded-md border border-[#334155]" placeholder="0D"
+                            <input type="text" id="customCharInput"
+                                class="input w-[5ch] rounded-md border border-[#334155]" placeholder="0D"
                                 style="display:none;">
-                            <button class="btn px-2 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm" id="insertBtn">Insertar</button>
+                            <button
+                                class="btn px-2 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm"
+                                id="insertBtn">Insertar</button>
                         </div>
 
                         <div class="flex justify-end gap-4">
-                            <button class="btn px-2 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm" id="copyRawBtn">Copiar raw</button>
-                            <button class="btn px-2 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm" id="clearBtn">Limpiar</button>
+                            <button
+                                class="btn px-2 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm"
+                                id="copyRawBtn">Copiar raw</button>
+                            <button
+                                class="btn px-2 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm"
+                                id="clearBtn">Limpiar</button>
                         </div>
                     </div>
                     <div class="flex flex-col flex-1 rounded-lg border border-[#334155] w-full p-2 mt-2">
-                    <textarea id="inputText" class="input mt-4 flex-1 "
-                        placeholder="Escribe secuencias de escape (ej. \r, \t, \x00, \x1B)">Hola\rMundo\n\tTabulado\nNulo: \x00\nEscape: \x1B</textarea>
+                        <textarea id="inputText" class="input mt-4 flex-1 "
+                            placeholder="Escribe secuencias de escape (ej. \r, \t, \x00, \x1B)"></textarea>
                     </div>
-                    </div>
+                </div>
 
                 <div id="toast" class="toast"></div>
 
@@ -159,7 +168,7 @@
                             escapedText = input;
                             // Interpretar escapes para obtener raw
                             rawText = unescapeString(input);
-                            
+
                         }
                         // ----- Mostrar/ocultar personalizado -----
                         insertSelect.addEventListener('change', function () {
@@ -176,7 +185,7 @@
                             const clipboardData = e.clipboardData || window.clipboardData;
                             const encoder = new TextEncoder();
                             let pasted = clipboardData.getData("text/plain");
-                            pasted=pasted.replace(/\r\n|\n/g, '\r\n');
+                            pasted = pasted.replace(/\r\n|\n/g, '\r\n');
                             console.log("Texto real:", JSON.stringify(pasted));
                             if (pasted) {
                                 // Escapar el texto pegado
@@ -268,7 +277,7 @@
                             });
                         });
 
-                        
+
 
                         // ----- Limpiar -----
                         clearBtn.addEventListener('click', function () {
@@ -302,40 +311,54 @@
 
         <!-- Botones: los dejamos al final sin flex-1 para que no se estiren -->
         <div class="flex justify-end m-6">
-            <button
-                class="mr-6 btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
-                BORRAR
-            </button>
-            <button
+            <div class="mr-auto" id="mensajes_error">
+                mensaje de prueba
+            </div>
+            <a href="{% url 'solicitudes' %}"><button
+                    class="mr-6 btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
+                    BORRAR
+                </button></a>
+            <button onclick="guardarPeticion()"
                 class="btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
+
                 GUARDAR
             </button>
         </div>
     </div>
     </div>
 
-    <!-- <script>
-        function seleccionarFila(fila) {
-            var filas = fila.parentElement.getElementsByTagName("tr");
-            for (var i = 0; i < filas.length; i++) {
-                filas[i].classList.remove("seleccionada");
+    <script>
+        function validarURLConHost(texto) {
+            try {
+                const url = new URL(texto);
+                // Verifica que sea http o https y que tenga un hostname
+                return (url.protocol === 'http:' || url.protocol === 'https:') && url.hostname !== '';
+            } catch {
+                return false;
             }
-            fila.classList.add("seleccionada");
         }
-        const caja = document.getElementById('peticion');
-        let save_caja = caja.value
-        // Evento al escribir
-        caja.addEventListener('input', () => {
-            save_caja = caja.value;
+        function guardarPeticion() {
+            const pdominio = document.getElementById('dominio');
+            if (validarURLConHost(pdominio)) {
+                document.getElementById("mensajes_error").innerText = "Dominio no valido revise, revise el campo dominio"
+            } else {
+                const ppeticion = document.getElementById('inputText');
+                const regex = /^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\s+(\S+)/;
+                const match = peticion.match(regex);
+                fetch('https://example.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dominio:pdominio , metodo: match[1], url:match[2], peticion: ppeticion})
+                })
+                    .then(respuesta => respuesta.json())
+                    .then(datos => 
+                        window.location.href = "{% url 'solicitudes' %}"
+                    );
+                
+            }
 
-            caja.value = whitescape.escape(save_caja);
-        });
-
-        // Evento al salir del cuadro
-        caja.addEventListener('change', () => {
-            console.log('Texto final: ' + caja.value);
-        });
-    </script> -->
+        }
+    </script>
 </body>
 
 </html>
