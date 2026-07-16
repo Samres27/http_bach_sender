@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseNotAllowed
 from django.template import loader
 from django.db.models import Max
 from .models import Peticiones
+from .utils.socket_sender import enviarPeticiones
 import re
 import json
 
@@ -79,6 +80,19 @@ def editor_guardar(request):
 
 
 # ----------- RESPUESTAS ------------
+def procesarPeticiones(request):
+    peticiones=Peticiones.objects.all().values()
+    resp=enviarPeticiones(peticiones)
+    for x in resp:
+        peticion_select= Peticiones.objects.get(nroPeticion=x["nro"])
+        peticion_select.respuesta=x["respuesta"]
+        peticion_select.codigo_respuesta=x["status"]
+        peticion_select.save()
+
 def respuestas(request):
+    total_peticiones=Peticiones.objects.all().values()
+    contenido={
+        "peticiones": total_peticiones,
+    }
     template = loader.get_template('respuestas.html')
-    return HttpResponse(template.render())
+    return HttpResponse(template.render(context=contenido))

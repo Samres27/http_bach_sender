@@ -7,5 +7,6 @@ class Peticiones(models.Model):
     url = models.CharField(max_length=255)
     https=models.BooleanField()
     peticion = models.CharField()
-    respuesta = models.CharField()
+    respuesta = models.CharField(default="")
+    codigo_respuesta = models.CharField(default="")
     
