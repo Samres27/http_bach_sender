@@ -2,93 +2,219 @@
 
 <!DOCTYPE html>
 <html lang="es" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <title>Respuestas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="{% static 'css/output.css' %}" rel="stylesheet" type="text/css" />
 </head>
-<body class="bg-[#0F172A] text-[#E2E8F0] min-h-screen p-8">
+
+<body class="bg-[#0F172A] text-[#E2E8F0] min-h-screen p-8 flex flex-col flex-1">
 
     <!-- Panel Superior -->
-    <div class="bg-[#0F172A] p-6 rounded-t-xl border-b border-[#334155] flex justify-between items-center">
+    <div class="bg-[#0F172A] p-6 rounded-t-xl  flex justify-between items-center">
         <h1 class="text-2xl font-bold text-[#E2E8F0] tracking-wider">Respuestas</h1>
         <div class="flex gap-4">
-            <button class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
-                EJECUTAR
-            </button>
-            <button class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
-                BORRAR
-            </button>
+
+            <a href="/"><button
+                    class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
+                    VOLVER
+                </button></a>
         </div>
     </div>
+    <div class="flex flex-col flex-1 w-full h-full">
+        <!-- Contenedor Principal -->
+        <div class="bg-[#0F172A] p-6 border border-[#334155] rounded-xl flex-1">
 
-    <!-- Contenedor Principal -->
-    <div class="bg-[#0F172A] p-6 border-x border-b border-[#334155] rounded-b-xl">
-
-        <!-- Tabla de Datos -->
-        <div class="overflow-x-auto rounded-lg border border-[#334155]">
-            <table class="table w-full">
-                <thead>
-                    <tr class="bg-[#1E293B] text-[#94A3B8] border-b border-[#334155]">
-                        <th class="text-[#94A3B8] font-medium">ID Petición</th>
-                        <th class="text-[#94A3B8] font-medium">Hora</th>
-                        <th class="text-[#94A3B8] font-medium">Método</th>
-                        <th class="text-[#94A3B8] font-medium">URL</th>
-                        <th class="text-[#94A3B8] font-medium">Estado</th>
-                    </tr>
-                </thead>
-                <tbody class="text-center">
-                    <!-- Fila normal -->
-                    <tr onclick="seleccionarFila(this)" class="hover:bg-[#1E293B] border-b border-[#334155]">
-                        <td class="text-[#E2E8F0]">001</td>
-                        <td class="text-[#E2E8F0]">14:20</td>
-                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">GET</span></td>
-                        <td class="text-[#E2E8F0]">/api/data</td>
-                        <td><span class="text-[#94A3B8] font-semibold">Pendiente</span></td>
-                    </tr>
-                    <!-- Fila resaltada (Seleccionada) -->
-                    <tr onclick="seleccionarFila(this)" class="bg-[#1E293B] border-l-4 border-[#38BDF8] border-b border-[#334155]">
-                        <td class="text-[#E2E8F0]">002</td>
-                        <td class="text-[#E2E8F0]">14:22</td>
-                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">POST</span></td>
-                        <td class="text-[#E2E8F0]">/login</td>
-                        <td><span class="text-[#38BDF8] font-semibold">Fallida 503</span></td>
-                    </tr>
-                    <!-- Fila normal -->
-                    <tr onclick="seleccionarFila(this)" class="hover:bg-[#1E293B] border-b border-[#334155]">
-                        <td class="text-[#E2E8F0]">003</td>
-                        <td class="text-[#E2E8F0]">14:25</td>
-                        <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">PUT</span></td>
-                        <td class="text-[#E2E8F0]">/profile/update</td>
-                        <td><span class="text-[#38BDF8] font-semibold">Modificada</span></td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Tabla de Datos -->
+            <div class="overflow-x-auto rounded-lg border border-[#334155]">
+                <table class="table w-full">
+                    <thead>
+                        <tr class="bg-[#1E293B] text-[#94A3B8] border-b border-[#334155]">
+                            <th class="text-[#94A3B8] font-medium">ID Petición</th>
+                            <th class="text-[#94A3B8] font-medium">Método</th>
+                            <th class="text-[#94A3B8] font-medium">Dominio</th>
+                            <th class="text-[#94A3B8] font-medium">URL</th>
+                            <th class="text-[#94A3B8] font-medium">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <!-- Fila normal -->
+                        <tr onclick="seleccionarFila(this)" id="1" class="hover:bg-[#1E293B] border-b border-[#334155]">
+                            <td class="text-[#E2E8F0]">001</td>
+                            <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">GET</span></td>
+                            <td class="text-[#E2E8F0]">example:443</td>
+                            <td class="text-[#E2E8F0]">/api/data</td>
+                            <td><span class="text-[#94A3B8] font-semibold">Pendiente</span></td>
+                        </tr>
+                        <!-- Fila resaltada (Seleccionada) -->
+                        <tr onclick="seleccionarFila(this)" id="2"
+                            class="hover:bg-[#1E293B] border-b border-[#334155]">
+                            <td class="text-[#E2E8F0]">002</td>
+                            <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">POST</span></td>
+                            <td class="text-[#E2E8F0]">exampe:80</td>
+                            <td class="text-[#E2E8F0]">/login</td>
+                            <td><span class="text-[#38BDF8] font-semibold">Fallida 503</span></td>
+                        </tr>
+                        <!-- Fila normal -->
+                        <tr onclick="seleccionarFila(this)" id="3" class="hover:bg-[#1E293B] border-b border-[#334155]">
+                            <td class="text-[#E2E8F0]">003</td>
+                            <td><span class="badge bg-[#334155] text-[#E2E8F0] border-0">PUT</span></td>
+                            <td class="text-[#E2E8F0]">example:443</td>
+                            <td class="text-[#E2E8F0]">/profile/update</td>
+                            <td><span class="text-[#38BDF8] font-semibold">Modificada</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- Botón Editar -->
-        <div class="flex justify-end mt-6">
-            <button class="btn bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-bold px-8 shadow-lg rounded-sm">
-                EDITAR PETICIÓN
-            </button>
-        </div>
+        <h2 class="text-xl font-bold text-[#E2E8F0] tracking-wider ml-6 mt-1 mb-1">Detalle</h2>
+        <div class="bg-[#0F172A] p-6 border border-[#334155] rounded-xl flex-1 flex flex-col">
+            <textarea id="inputText" class="input mt-2 flex-1 " readonly>
+            </textarea>
+            <script>
+                data_json = [
+                    {
+                        "id": 1,
+                        "respuesta": "HTTP/1.1 501 Not Implemented\nConnection: close\nContent-Length: 0\nDate: Fri, 10 Jul 2026 03:50:27 GMT\n"
+                    },
+                    {
+                        "id": 2,
+                        "respuesta": "HTTP/1.2 501 Not Implemented\nConnection: close\nContent-Length: 0\nDate: Fri, 10 Jul 2026 03:50:27 GMT\n"
+                    },
+                    {
+                        "id": 3,
+                        "respuesta": "HTTP/1.3   501 Not Implemented\nConnection: close\nContent-Length: 0\nDate: Fri, 10 Jul 2026 03:50:27 GMT\n"
+                    }
+                ]
 
+
+
+                function buscarPorId(id) {
+                    console.log(id)
+                    return data_json.find(item => item.id === id);
+                }
+                function seleccionarFila(fila) {
+                    // const datos = JSON.parse(data_json);
+                    const datos = data_json;
+                    console.log(datos)
+                    // 3. Función para buscar
+
+                    // Busca todas las filas de la tabla
+                    var filas = fila.parentElement.getElementsByTagName("tr");
+
+                    // Quita el color amarillo de las otras filas
+                    for (var i = 0; i < filas.length; i++) {
+                        if (fila.id != filas[i].id) {
+                            filas[i].classList.remove("border-l-4");
+                            filas[i].classList.remove("bg-[#1E293B]");
+                            filas[i].classList.add("hover:bg-[#1E293B]")
+                        } else {
+                            filas[i].classList.remove("hover:bg-[#1E293B]");
+                        }
+                    }
+
+                    console.log(fila.id)
+                    fila.classList.add("border-l-4");
+                    fila.classList.add("bg-[#1E293B]");
+                    const encontrado = buscarPorId(Number(fila.id));
+                    console.log(encontrado["respuesta"])
+                    document.getElementById('inputText').value = encontrado["respuesta"]
+                }
+            </script>
+
+            <script>
+
+                (function () {
+                    'use strict';
+
+                    // ----- DOM -----
+                    const textarea = document.getElementById('inputText');
+                    const toastEl = document.getElementById('toast');
+                    console.log(JSON.stringify(textarea.value))
+                    // ----- Estado -----
+                    let rawText = '';      // texto real con caracteres especiales
+                    let escapedText = '';  // versión escapada (se muestra en textarea)
+
+                    // ----- Utilidades -----
+                    function escapeHtml(str) {
+                        const div = document.createElement('div');
+                        div.textContent = str;
+                        return div.innerHTML;
+                    }
+
+                    function showToast(msg, duration = 2000) {
+                        toastEl.textContent = msg;
+                        toastEl.classList.add('show');
+                        clearTimeout(window._toastTimer);
+                        window._toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration);
+                    }
+
+                    function escapeChar(char) {
+                        const code = char.charCodeAt(0);
+                        if (code === 13) return '\\r';
+                        if (code === 10) return '\n';
+                        if (code === 9) return '\\t';
+                        if (code === 0) return '\\0';
+                        if (code === 27) return '\\x1B';
+                        if (code < 32 || code === 127 || code > 127) {
+                            const hex = code.toString(16).toUpperCase().padStart(2, '0');
+                            return '\\x' + hex;
+                        }
+                        return char;
+                    }
+
+                    function escapeString(str) {
+                        let result = '';
+                        for (let i = 0; i < str.length; i++) {
+                            result += escapeChar(str[i]);
+                        }
+                        return result;
+                    }
+
+                    // Desescapar (interpretar secuencias) a caracteres reales
+                    function unescapeString(str) {
+                        return str.replace(/\\(r|t|0|x([0-9A-Fa-f]{2}))/g, function (match, p1, p2) {
+                            if (p1 === 'r') return '\r';
+                            if (p1 === 't') return '\t';
+                            if (p1 === '0') return '\0';
+                            if (p1 === 'x' && p2) {
+                                return String.fromCharCode(parseInt(p2, 16));
+                            }
+                            return match;
+                        });
+                    }
+
+
+                    // ----- Sincronizar todo a partir del textarea (escapedText) -----
+                    function syncFromTextarea() {
+                        const input = textarea.value;
+                        escapedText = input;
+                        // Interpretar escapes para obtener raw
+                        rawText = unescapeString(input);
+
+                    }
+
+                    // ----- Eventos -----
+                    textarea.addEventListener('input', syncFromTextarea);
+
+                    // ----- Inicializar -----
+                    function init() {
+                        // El textarea ya tiene un ejemplo
+                        syncFromTextarea();
+                    }
+
+                    init();
+
+
+
+                })();
+            </script>
+
+        </div>
     </div>
-    <script>
-        function seleccionarFila(fila) {
-        // Busca todas las filas de la tabla
-        var filas = fila.parentElement.getElementsByTagName("tr");
-
-        // Quita el color amarillo de las otras filas
-        for (var i = 0; i < filas.length; i++) {
-            filas[i].classList.remove("seleccionada");
-        }
-
-        console.log(fila)
-        fila.classList.add("seleccionada");
-        }
-    </script>
-
 </body>
+
 </html>
