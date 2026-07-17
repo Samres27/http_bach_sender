@@ -17,8 +17,8 @@ def enviarPeticiones(lista):
     listaSessiones = {}
     respuestas=[]
     for x in lista:
-        https = x.https
-        dominio_limpio = x.dominio.replace("http://", "").replace("https://", "")
+        https = x["https"]
+        dominio_limpio = x["dominio"].replace("http://", "").replace("https://", "")
         splitDominio = dominio_limpio.split(":")
         
         if len(splitDominio) > 1: 
@@ -33,17 +33,17 @@ def enviarPeticiones(lista):
             host = host_str 
 
         # --- LÓGICA DE CONEXIÓN ---
-        if not (x.dominio in listaSessiones):
+        if not (x["dominio"] in listaSessiones):
             sock = socket.create_connection((host, puerto))
             if https:
                 context = ssl.create_default_context()
                 sock = context.wrap_socket(sock, server_hostname=host) 
-            listaSessiones[x.dominio] = sock
+            listaSessiones[x["dominio"]] = sock
             conexion = sock
         else:
-            conexion = listaSessiones[x.dominio]
-        a,b=enviarPeticion(conexion, x.peticion)
-        respuestas.append({"nro":x.nroPeticion,"resp":a,"status":b})
+            conexion = listaSessiones[x["dominio"]]
+        a,b=enviarPeticion(conexion, x["peticion"])
+        respuestas.append({"nro":x["nroPeticion"],"resp":a,"status":b})
     for conexion_abierta in listaSessiones.values():
         conexion_abierta.close()
 
@@ -69,7 +69,7 @@ def enviarPeticion(sock,request):
                         resBody=sock.recv(ConLen-len(body))
                         body=body+resBody
                         break
-            response1 += chunk
+            response += chunk
             if not chunk:
                 break
             break  # Esto es solo para demostración, realmente deberíamos leer toda la respuesta.
@@ -98,6 +98,7 @@ def enviarPeticion(sock,request):
                     body=lzma.decompress(body) 
                 case b"xz":
                     body=lzma.decompress(body) 
-                    
-    return header+b'\r\n\r\n'+body, re.search(rb'HTTP/\d\.\d (\d{3})', header)
+    
+    stringdecode=(header+b'\r\n\r\n'+body).decode(errors="replace")            
+    return stringdecode, re.search(rb'HTTP/\d\.\d (\d{3})', header).group(1).decode()
 

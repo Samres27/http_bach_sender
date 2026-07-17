@@ -16,7 +16,7 @@
     <div class="bg-[#0F172A] p-6 rounded-t-xl border-b border-[#334155] flex justify-between items-center">
         <h1 class="text-2xl font-bold text-[#E2E8F0] tracking-wider">COLA DE PETICIONES</h1>
         <div class="flex gap-4">
-            <button
+            <button onclick="ejecutar_todo()"
                 class="btn px-4 bg-[#38BDF8] text-[#0F172A] border-0 hover:bg-[#7DD3FC] hover:text-[#0F172A] font-semibold rounded-sm">
                 EJECUTAR
             </button>
@@ -97,6 +97,12 @@
             if (nroPeticion) {
                 window.location.href = "{% url 'editar' %}/" + nroPeticion
             }
+        }
+        function ejecutar_todo() {
+            fetch("{% url 'ejecutar' %}")
+                .then(response => {
+                    window.location.href = "{% url 'respuestas' %}";
+                });
         }
         function borrarPeticion() {
             if (nroPeticion) {

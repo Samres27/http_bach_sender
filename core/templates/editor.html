@@ -147,7 +147,7 @@
                     function escapeChar(char) {
                         const code = char.charCodeAt(0);
                         if (code === 13) return '\\r';
-                        if (code === 10) return '\n';
+                        if (code === 10) return '\\n';
                         if (code === 9) return '\\t';
                         if (code === 0) return '\\0';
                         if (code === 27) return '\\x1B';
@@ -168,8 +168,9 @@
 
                     // Desescapar (interpretar secuencias) a caracteres reales
                     function unescapeString(str) {
-                        return str.replace(/\\(r|t|0|x([0-9A-Fa-f]{2}))/g, function (match, p1, p2) {
+                        return str.replace(/\\(r|n|t|0|x([0-9A-Fa-f]{2}))/g, function (match, p1, p2) {
                             if (p1 === 'r') return '\r';
+                            if (p1 === 'n') return '\n';
                             if (p1 === 't') return '\t';
                             if (p1 === '0') return '\0';
                             if (p1 === 'x' && p2) {
@@ -185,8 +186,8 @@
                     function syncFromTextarea() {
                         const input = textarea.value;
                         escapedText = input;
-                        // Interpretar escapes para obtener raw
-                        rawText = unescapeString(input);
+                        // Interpretar escapes para obtener raw y normalizar \n → \r\n
+                        rawText = unescapeString(input).replace(/\r?\n/g, '\r\n');
 
                     }
                     // ----- Mostrar/ocultar personalizado -----
@@ -274,6 +275,7 @@
                         if (charToInsert) {
                             // Insertar en rawText (al final, porque no tenemos posición exacta)
                             rawText += charToInsert;
+                            rawText = rawText.replace(/\r?\n/g, '\r\n');
                             // Actualizar escaped
                             escapedText = escapeString(rawText);
                             textarea.value = escapedText;
@@ -321,6 +323,9 @@
 
                     // init();
 
+                    // Exponer unescapeString globalmente para guardarPeticion
+                    window.unescapeString = unescapeString;
+
                     // Enter en personalizado dispara inserción
                     customCharInput.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter') {
@@ -351,7 +356,7 @@
             const pdominio = document.getElementById('dominio');
 
             if (!validarURLConHost(pdominio.value)) {
-                document.getElementById("toast").innerText = "Dominio no valido revise, revise el campo dominio"
+                document.getElementById("toast").innerText = "Dominio no valido, revise el campo dominio"
             } else {
                 
                 const ppeticion = document.getElementById('inputText');
@@ -363,6 +368,7 @@
                     return; // Detenemos la ejecución aquí
                 }
 
+                const rawPeticion = window.unescapeString(ppeticion.value).replace(/\r?\n/g, '\r\n');
                 fetch("{% url 'guardar_peticion' %}", {
                     method: 'POST',
                     headers: {
@@ -373,7 +379,7 @@
                         "dominio": pdominio.value,
                         "metodo": match[1],
                         "url": match[2],
-                        "peticion": ppeticion.value
+                        "peticion": rawPeticion
                     })
                 })
                     .then(response => {

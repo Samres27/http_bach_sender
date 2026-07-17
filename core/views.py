@@ -61,8 +61,9 @@ def editor_guardar(request):
                         respuesta="")
                 nuevoPeticion.save()
             else:
+                print()
                 ## actualizar peticcion
-                act_peticion=Peticiones.objects.get(id=nroP)
+                act_peticion=Peticiones.objects.get(nroPeticion=nroP)
                 act_peticion.metodo=cuerpo["metodo"]
                 act_peticion.dominio=cuerpo["dominio"]
                 act_peticion.url=cuerpo["url"]
@@ -80,19 +81,22 @@ def editor_guardar(request):
 
 
 # ----------- RESPUESTAS ------------
-def procesarPeticiones(request):
+def ejecutar(request):
     peticiones=Peticiones.objects.all().values()
     resp=enviarPeticiones(peticiones)
+    print(resp)
     for x in resp:
         peticion_select= Peticiones.objects.get(nroPeticion=x["nro"])
-        peticion_select.respuesta=x["respuesta"]
+        peticion_select.respuesta=x["resp"]
         peticion_select.codigo_respuesta=x["status"]
         peticion_select.save()
+    return HttpResponse(status=200)
 
 def respuestas(request):
     total_peticiones=Peticiones.objects.all().values()
     contenido={
         "peticiones": total_peticiones,
+        "peticionesJson": json.dumps(list(total_peticiones)),
     }
     template = loader.get_template('respuestas.html')
     return HttpResponse(template.render(context=contenido))

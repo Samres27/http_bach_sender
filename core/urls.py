@@ -14,5 +14,6 @@ urlpatterns = [
     path('editar/guardar', views.editor_guardar, name='guardar_peticion'),
     
     #vistas ejecutar
-    path('respuestas',views.respuestas, name="respuestas")
+    path('ejecutar',views.ejecutar, name="ejecutar"),
+    path('respuestas',views.respuestas, name="respuestas"),
 ]
